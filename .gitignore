@@ -1,0 +1,14 @@
+# MATLAB autosave and cache
+*.asv
+*.m~
+*.autosave
+slprj/
+*.slxc
+*.mex*
+*.p
+codegen/
+checkpoint/
+test-results/
+# Session data (large or machine-specific)
+*.mat
+!data/*.mat
