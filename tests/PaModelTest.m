@@ -39,5 +39,39 @@ classdef PaModelTest < matlab.unittest.TestCase
         function evenOrderRejected(tc)
             tc.verifyError(@() pa_poly_fit((1:5).', (1:5).', 4), 'pa_poly_fit:order');
         end
+        function mpFitRecoversCoefficients(tc)
+            rng(1);
+            x = 0.5 * (randn(500, 1) + 1j * randn(500, 1));
+            c = [1; 0.1j; -0.05; 0.2; 0.02; -0.01j];
+            y = mp_eval(x, c, 5, 1);
+            tc.verifyEqual(mp_fit(x, y, 5, 1), c, 'AbsTol', 1e-8);
+        end
+        function evmZeroForIdealSignal(tc)
+            cfg = pa_config();
+            rng(cfg.seed);
+            c = cfg.ofdm; c.papr_clip_db = Inf;
+            [x, info] = ofdm_generate(c);
+            tc.verifyLessThan(calc_evm(3 * exp(1j) * x, info), 1e-6);
+        end
+        function acprImprovesWithLowerDistortion(tc)
+            cfg = pa_config();
+            rng(cfg.seed);
+            [x, info] = ofdm_generate(cfg.ofdm);
+            y = pa_memory(x, cfg);
+            tc.verifyLessThan(calc_acpr(x, info.bw_norm, 1.5), ...
+                calc_acpr(y, info.bw_norm, 1.5));
+        end
+        function dpdImprovesAcprAndEvm(tc)
+            cfg = pa_config();
+            rng(cfg.seed);
+            [x, info] = ofdm_generate(cfg.ofdm);
+            pa = @(u) pa_memory(u, cfg);
+            d = cfg.dpd;
+            u = dpd_ila(x, pa, d.K, d.Q, d.gain, d.n_iter);
+            tc.verifyLessThan(calc_acpr(pa(u), info.bw_norm, 1.5), ...
+                calc_acpr(pa(x), info.bw_norm, 1.5) - 5);
+            tc.verifyLessThan(calc_evm(pa(u), info), ...
+                calc_evm(pa(x), info) / 3);
+        end
     end
 end

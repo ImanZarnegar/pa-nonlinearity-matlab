@@ -24,6 +24,26 @@ cfg.poly.orders  = [3 5];       % odd polynomial orders to fit
 cfg.poly.fit_max = 0.9;         % fit range upper bound (input amplitude)
 
 cfg.compression_db = 1;         % compression level for P1dB
-cfg.results_dir    = 'results';
-cfg.figure_name    = 'pa_nonlinearity.png';
+
+cfg.ofdm.nfft         = 256;    % FFT size (before oversampling)
+cfg.ofdm.osf          = 8;      % oversampling factor
+cfg.ofdm.n_active     = 200;    % active subcarriers
+cfg.ofdm.ncp          = 18;     % cyclic prefix length (at nfft rate)
+cfg.ofdm.n_symbols    = 60;     % OFDM symbols
+cfg.ofdm.papr_clip_db = 8;      % clipping (crest factor reduction)
+cfg.ofdm.rms_in       = 0.3;    % PA input rms (normalized, drives compression)
+
+cfg.memory.h_in  = [1, 0.25-0.1j, 0.05j];   % PA input FIR (memory effect)
+cfg.memory.h_out = [1, -0.15+0.1j];         % PA output FIR
+
+cfg.dpd.K      = 7;     % MP nonlinearity order (odd)
+cfg.dpd.Q      = 3;     % MP memory depth
+cfg.dpd.gain   = 1.0;   % target linear gain of DPD + PA
+cfg.dpd.n_iter = 3;     % ILA iterations
+
+cfg.acpr_offset = 1.5;  % adjacent channel offset [channel bandwidths]
+
+cfg.results_dir     = 'results';
+cfg.figure_name     = 'pa_nonlinearity.png';
+cfg.dpd_figure_name = 'dpd_spectrum.png';
 end
